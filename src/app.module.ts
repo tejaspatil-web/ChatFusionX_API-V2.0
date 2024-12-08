@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './connections/database/db-connection.module';
 import { UserModule } from './modules/user/user.module';
+import { SocketModule } from './connections/socket/socket.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { UserModule } from './modules/user/user.module';
       envFilePath: '.env',
     }),
     DatabaseModule,
+    SocketModule,
     UserModule,
   ],
   controllers: [AppController],

@@ -11,9 +11,9 @@ async function bootstrap() {
     prefix: 'api/v',
   });
 
-  // Enable CORS with custom options
+  // Enable CORS
   app.enableCors({
-    origin: ['*', 'http://localhost:4200'],
+    origin: ['http://localhost:4200'],
     methods: 'GET, POST, PUT, DELETE',
     // allowedHeaders: 'Content-Type, Authorization',
     credentials: true,
