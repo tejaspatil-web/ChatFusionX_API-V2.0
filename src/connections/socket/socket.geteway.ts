@@ -10,7 +10,7 @@ import { Socket } from 'socket.io';
 @WebSocketGateway({
   namespace: 'getway',
   cors: {
-    origin: 'http://localhost:4200',
+    origin: ['http://localhost:4200', 'https://chatfusionx.web.app'],
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type'],
     credentials: true,
