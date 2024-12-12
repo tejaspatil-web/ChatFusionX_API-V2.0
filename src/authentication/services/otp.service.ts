@@ -18,16 +18,112 @@ export class OtpService {
     const otp = generateOtp();
 
     // Path to the HTML template file
-    const templatePath = path.join(
-      __dirname,
-      '../../templates/otp-template.html',
-    );
+    // const templatePath = path.join(
+    //   __dirname,
+    //   '../../templates/otp-template.html',
+    // );
 
     // Read the HTML template from the file
-    const templateSource = fs.readFileSync(templatePath, 'utf-8');
+    //const templateSource = fs.readFileSync(templatePath, 'utf-8');
 
     // Compile the template with Handlebars
-    const template = handlebars.compile(templateSource);
+    const template = handlebars.compile(`<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OTP Verification</title>
+  </head>
+  <body
+    style="
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f7f7f7;
+      color: #333;
+    "
+  >
+    <table
+      style="
+        width: 100%;
+        max-width: 600px;
+        margin: 20px auto;
+        border-collapse: collapse;
+      "
+    >
+      <tr>
+        <td>
+          <div
+            class="email-container"
+            style="
+              background-color: #ffffff;
+              border-radius: 8px;
+              box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+              overflow: hidden;
+            "
+          >
+            <!-- Header -->
+            <div
+              class="header"
+              style="
+                background-color: #816efd;
+                color: #ffffff;
+                text-align: center;
+                padding: 20px;
+              "
+            >
+              <h1 style="margin: 0">OTP Verification</h1>
+            </div>
+            <!-- Body -->
+            <div class="body" style="padding: 20px; text-align: center">
+              <p style="margin: 0">Hello {{userName}},</p>
+              <p style="margin: 10px 0">
+                We received a request to verify your account. Please use the OTP
+                below to complete your verification:
+              </p>
+              <div
+                class="otp-code"
+                style="
+                  font-size: 24px;
+                  font-weight: bold;
+                  color: #333;
+                  background-color: #f4f4f4;
+                  padding: 15px;
+                  border-radius: 5px;
+                  margin-top: 10px;
+                "
+              >
+                {{otp}}
+              </div>
+              <p style="margin: 10px 0">This OTP will expire in 10 minutes.</p>
+              <p style="margin: 10px 0">
+                If you did not request this verification, please ignore this
+                email.
+              </p>
+            </div>
+            <!-- Footer -->
+            <div
+              class="footer"
+              style="
+                background-color: #f7f7f7;
+                color: #777;
+                font-size: 12px;
+                padding: 20px;
+                text-align: center;
+                border-top: 1px solid #ddd;
+              "
+            >
+              <p style="margin: 0">
+                &copy; {{year}} ChatfusionX. All rights reserved.
+              </p>
+            </div>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
+`);
 
     // Inject dynamic data (name, OTP, and year) into the template
     const htmlContent = template({
