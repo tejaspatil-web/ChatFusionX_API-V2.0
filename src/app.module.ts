@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './connections/database/db-connection.module';
 import { UserModule } from './modules/user/user.module';
 import { SocketModule } from './connections/socket/socket.module';
+import { AuthModule } from './authentication/auth.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { SocketModule } from './connections/socket/socket.module';
     DatabaseModule,
     SocketModule,
     UserModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

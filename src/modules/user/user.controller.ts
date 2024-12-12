@@ -28,23 +28,23 @@ export class UserController {
       });
   }
 
-  @Post('register')
-  async createUser(
-    @Res() response: Response,
-    @Body() createUserDto: CreateUserDto,
-  ) {
-    return this.userService
-      .createUser(createUserDto)
-      .then((res) => {
-        response
-          .status(HttpStatus.CREATED)
-          .send({ message: 'User Saved Successfully' });
-      })
-      .catch((error: HttpException) => {
-        console.error(error);
-        throw new HttpException(error.message, error.getStatus());
-      });
-  }
+  // @Post('register')
+  // async createUser(
+  //   @Res() response: Response,
+  //   @Body() createUserDto: CreateUserDto,
+  // ) {
+  //   return this.userService
+  //     .createUser(createUserDto)
+  //     .then((res) => {
+  //       response
+  //         .status(HttpStatus.CREATED)
+  //         .send({ message: 'User Saved Successfully' });
+  //     })
+  //     .catch((error: HttpException) => {
+  //       console.error(error);
+  //       throw new HttpException(error.message, error.getStatus());
+  //     });
+  // }
 
   @Post('validate')
   async validateUser(

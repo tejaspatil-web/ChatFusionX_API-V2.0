@@ -4,15 +4,15 @@ import { applyCommonSchemaTransformations } from 'src/utils/schema-utils';
 
 export type UserDocument = HydratedDocument<User>;
 
-@Schema()
+@Schema({ timestamps: true })
 export class User {
-  @Prop({required:true})
+  @Prop({ required: true })
   name: string;
 
-  @Prop({required:true})
+  @Prop({ required: true })
   email: string;
 
-  @Prop({required:true})
+  @Prop({ required: true })
   password: string;
 }
 
