@@ -17,15 +17,6 @@ export class OtpService {
   async sendOtpEmail(sendEmailDto: sendEmailDto): Promise<void> {
     const otp = generateOtp();
 
-    // Path to the HTML template file
-    // const templatePath = path.join(
-    //   __dirname,
-    //   '../../templates/otp-template.html',
-    // );
-
-    // Read the HTML template from the file
-    //const templateSource = fs.readFileSync(templatePath, 'utf-8');
-
     // Compile the template with Handlebars
     const template = handlebars.compile(`<!doctype html>
 <html lang="en">
