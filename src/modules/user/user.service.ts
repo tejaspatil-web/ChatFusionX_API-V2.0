@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './user.schema';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { CreateUserDto, ValidateUserDto } from './dtos/user.dto';
 import * as bcrypt from 'bcrypt';
 
@@ -29,13 +29,39 @@ export class UserService {
 
   async validateUser(
     userData: ValidateUserDto,
-  ): Promise<{ isUserValid: boolean }> {
+  ): Promise<{ isUserValid: boolean,userDetails:any }> {
     const { email, password } = userData;
     const user = await this.userModel.findOne({ email: email });
     if (!user) {
       throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
     }
     const isValid = await bcrypt.compare(password, user.password);
-    return { isUserValid: isValid };
+    return { isUserValid: isValid,userDetails:user };
+  }
+
+
+  async assignGroupToUser(userId: string, groupId: string) {
+    try {
+      await this.userModel.findByIdAndUpdate(userId, {
+        $push: {
+          adminGroupIds: groupId,
+          joinedGroupIds: groupId,
+        },
+      });
+    } catch (error) {
+      console.error('Error updating user with group ID:', error);
+      throw error;
+    }
+  }
+
+  async addGroupToUser(userId: string, groupId: Types.ObjectId) {
+    try {
+      await this.userModel.findByIdAndUpdate(userId, {
+        $addToSet: { joinedGroupIds: groupId }
+      });
+    } catch (error) {
+      console.error('Error updating user with group ID:', error);
+      throw error;
+    }
   }
 }

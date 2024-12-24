@@ -55,7 +55,7 @@ export class UserController {
       .validateUser(userData)
       .then((data) => {
         if (data.isUserValid) {
-          response.status(HttpStatus.OK).send(data);
+          response.status(HttpStatus.OK).send(data.userDetails);
         } else {
           throw new HttpException('Invalid password', HttpStatus.UNAUTHORIZED);
         }

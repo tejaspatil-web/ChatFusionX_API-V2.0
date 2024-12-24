@@ -6,6 +6,7 @@ import { DatabaseModule } from './connections/database/db-connection.module';
 import { UserModule } from './modules/user/user.module';
 import { SocketModule } from './connections/socket/socket.module';
 import { AuthModule } from './authentication/auth.module';
+import { GroupModule } from './modules/group/group.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { AuthModule } from './authentication/auth.module';
     DatabaseModule,
     SocketModule,
     UserModule,
+    GroupModule,
     AuthModule,
   ],
   controllers: [AppController],
