@@ -48,7 +48,7 @@ export class GroupService {
         {
           $addToSet: { members: userObjectId },
         },
-        { new: true,select: 'name _Id' }
+        { new: true,select: 'name _Id description' }
       );
 
       // Add the group ID
