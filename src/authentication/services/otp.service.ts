@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Otp } from '../schemas/otp.schema';
 import { Model } from 'mongoose';
 import { createTransport } from 'nodemailer';
-import { sendEmailDto, verifyOtpDto } from '../dtos/otp.dto';
+import { resetPasswordDto, sendEmailDto } from '../dtos/otp.dto';
 import { generateOtp } from 'src/utils/common-utils';
 import * as handlebars from 'handlebars';
 import * as fs from 'fs';
@@ -151,6 +151,82 @@ export class OtpService {
       );
     }
   }
+
+  async sendEmailResetPassword(resetPasswordDto: resetPasswordDto): Promise<void> {
+    // Compile the template with Handlebars
+    const template = handlebars.compile(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Password Recovery</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0;">
+  <table width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #f4f4f4; padding: 20px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellspacing="0" cellpadding="0" border="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+          <tr>
+            <td style="background-color: #816efd; color: #ffffff; text-align: center; padding: 20px; font-size: 24px; font-weight: bold;">
+              Password Recovery
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 20px; color: #333333; line-height: 1.6;">
+              <p style="margin: 0 0 15px;">Dear {{userName}},</p>
+              <p style="margin: 0 0 15px;">You requested your password. Below are your login credentials:</p>
+              <p style="margin: 0 0 15px; font-weight: bold;">Email: <span style="color: #816efd;">{{email}}</span></p>
+              <p style="margin: 0 0 15px; font-weight: bold;">Password: <span style="color: #816efd;">{{password}}</span></p>
+              <p style="margin: 0 0 15px;">If you did not request this email, please contact our support team immediately.</p>
+              <p style="margin: 0;">Thank you,</p>
+              <p style="margin: 0;">The Support Team</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color: #f4f4f4; text-align: center; padding: 15px; font-size: 12px; color: #888888;">
+              &copy; {{year}} ChatfusionX. All rights reserved
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+`);
+
+    // Inject dynamic data (name, OTP, and year) into the template
+    const htmlContent = template({
+      userName: resetPasswordDto.userName,
+      year: new Date().getFullYear(),
+      email:resetPasswordDto.email,
+      password:resetPasswordDto.password
+    });
+
+    const transporter = createTransport({
+      service: 'gmail',
+      secure: true,
+      port: process.env.EMAILPORT,
+      auth: {
+        user: process.env.EMAIL_USERNAME,
+        pass: process.env.CHAT_EMAIL_PASSWORD,
+      },
+    });
+
+    const mailOptions = {
+      from: '"ChatfusionX" <no-reply@chatfusionx.com>',
+      to: resetPasswordDto.email,
+      subject: 'Your New Password for Account Access',
+      html: htmlContent,
+    };
+
+    try {
+      await transporter.sendMail(mailOptions);
+      console.log(`recovery email sent to ${resetPasswordDto.email}`);
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
+
 
   async saveOtp(email: string, otp: string): Promise<Otp> {
     const otpDoc = new this.OtpModel({

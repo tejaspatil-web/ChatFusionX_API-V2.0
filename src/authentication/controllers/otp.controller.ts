@@ -7,7 +7,7 @@ import {
   Res,
 } from '@nestjs/common';
 import { OtpService } from '../services/otp.service';
-import { sendEmailDto, verifyOtpDto } from '../dtos/otp.dto';
+import { resetPasswordDto, sendEmailDto } from '../dtos/otp.dto';
 import { Response } from 'express';
 import { UserService } from 'src/modules/user/user.service';
 import { CreateUserDto } from 'src/modules/user/dtos/user.dto';
@@ -59,6 +59,35 @@ export class OtpController {
       console.error(error);
       throw new HttpException(
         error.message || 'Something went wrong during sign-up',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Post('reset')
+  async resetPassword(
+    @Res() response: Response,
+    @Body() resetPasswordDto: resetPasswordDto,
+  ) {
+    try{
+    const user = await this.userService.resetPassword(resetPasswordDto.email);
+    resetPasswordDto.password = user.password;
+    resetPasswordDto.userName = user.user.name;
+      return this.otpService
+      .sendEmailResetPassword(resetPasswordDto)
+      .then((res) => {
+        response.status(HttpStatus.OK).send({
+          message:
+            'A reset password email has been sent. Please check your inbox.',
+        });
+      }).catch(error =>{
+        console.error(error);
+        throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      })
+    }catch(error){
+       console.error(error)
+       throw new HttpException(
+        error.message || 'Something went wrong during forgot password',
         error.status || HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

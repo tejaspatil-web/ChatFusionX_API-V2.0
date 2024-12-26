@@ -4,6 +4,7 @@ import { User } from './user.schema';
 import { Model, Types } from 'mongoose';
 import { CreateUserDto, ValidateUserDto } from './dtos/user.dto';
 import * as bcrypt from 'bcrypt';
+import { generateRandomPassword } from 'src/utils/common-utils';
 
 @Injectable()
 export class UserService {
@@ -62,6 +63,18 @@ export class UserService {
     } catch (error) {
       console.error('Error updating user with group ID:', error);
       throw error;
+    }
+  }
+
+  async resetPassword(email:string): Promise<{password:string,user:User}> {
+    const user = await this.userModel.findOne({ email: email });
+    if (user) {
+      const randomPassword = generateRandomPassword();
+      const hashedPassword = await bcrypt.hash(randomPassword, 10);
+      await user.updateOne({ password: hashedPassword });
+      return { password: randomPassword, user };
+    }else{
+      throw {status:404,message:'User not found'}
     }
   }
 }
