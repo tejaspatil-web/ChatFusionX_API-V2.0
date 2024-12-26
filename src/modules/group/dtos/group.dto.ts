@@ -12,3 +12,11 @@ export class JoinGroupDto{
 export class GetAllGroupsDto{
     groupIds:string []
 }
+
+export class SaveMessageDto{
+    userName:string
+    groupId:string
+    userId:string
+    message:string
+    time:string
+}

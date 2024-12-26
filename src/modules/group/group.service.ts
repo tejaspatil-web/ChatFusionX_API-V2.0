@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Group } from './group.schema';
-import { CreateGroupDto, GetAllGroupsDto, JoinGroupDto } from './dtos/group.dto';
+import { CreateGroupDto, GetAllGroupsDto, JoinGroupDto, SaveMessageDto } from './dtos/group.dto';
 import { UserService } from '../user/user.service';
 
 @Injectable()
@@ -68,7 +68,7 @@ export class GroupService {
   
       const groups = await this.groupModel.find({
         _id: { $in: objectIds },
-      }).select('_id name description');
+      }).select('_id name description messages');
   
       return groups;
     } catch (error) {
@@ -77,5 +77,23 @@ export class GroupService {
     }
   }
   
+
+  async saveGroupMessages(message:SaveMessageDto){
+    try{
+     return this.groupModel.findByIdAndUpdate(message.groupId,{
+      $push:{messages:{
+        userId:new Types.ObjectId(message.userId),
+        userName:message.userName,
+        message:message.message,
+        time:message.time
+      },
+    }
+  },
+  {new:true})
+    }catch(error){
+      console.error(error);
+      throw error;
+    }
+  }
 
 }

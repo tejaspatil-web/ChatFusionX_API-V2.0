@@ -6,6 +6,8 @@ import {
   SubscribeMessage,
 } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
+import { SocketService } from './socket.service';
+import { SaveMessageDto } from 'src/modules/group/dtos/group.dto';
 
 @WebSocketGateway({
   namespace: 'getway',
@@ -17,6 +19,9 @@ import { Socket } from 'socket.io';
   },
 })
 export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
+
+ constructor(private _socketService:SocketService){}
+
   @WebSocketServer() private server: Socket;
 
   handleConnection(socket: Socket): void {
@@ -28,9 +33,14 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('groupMessage')
-  handleMessage(socket: Socket, data: any): void {
-    console.log('Received message:', data);
-    socket.broadcast.emit(data.groupId, data.message);
+  handleMessage(socket: Socket, message: SaveMessageDto): void {
+    console.log('Received message:', message);
+    this._socketService.saveGroupMessages(message).then(res =>{
+      console.log(res)
+      socket.broadcast.emit(message.groupId, message);
+    }).catch(error =>{
+      socket.broadcast.emit(message.groupId,'getting error while saving message');
+    });
   }
 
   @SubscribeMessage('joinGroup')

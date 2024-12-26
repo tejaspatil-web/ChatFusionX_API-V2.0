@@ -4,7 +4,7 @@ import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './connections/database/db-connection.module';
 import { UserModule } from './modules/user/user.module';
-import { SocketModule } from './connections/socket/socket.module';
+import { SocketModule } from './socket/socket.module';
 import { AuthModule } from './authentication/auth.module';
 import { GroupModule } from './modules/group/group.module';
 
