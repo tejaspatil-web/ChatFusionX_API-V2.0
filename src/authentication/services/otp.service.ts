@@ -208,7 +208,7 @@ export class OtpService {
       port: process.env.EMAILPORT,
       auth: {
         user: process.env.EMAIL_USERNAME,
-        pass: process.env.CHAT_EMAIL_PASSWORD,
+        pass: process.env.EMAIL_PASSWORD,
       },
     });
 
