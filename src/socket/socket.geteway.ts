@@ -32,20 +32,24 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log('Client disconnected:', socket.id);
   }
 
+  @SubscribeMessage('joinGroups')
+  handleJoinGroup(socket: Socket, groupIds: string[]): void {
+    console.log('Received message:', groupIds);
+    groupIds.forEach(id =>{
+      socket.join(id);
+    })
+  }
+
   @SubscribeMessage('groupMessage')
   handleMessage(socket: Socket, message: SaveMessageDto): void {
     console.log('Received message:', message);
+    //calling service to save messages
     this._socketService.saveGroupMessages(message).then(res =>{
       console.log(res)
-      socket.broadcast.emit(message.groupId, message);
+      // socket.broadcast.emit(message.groupId, message);
+      socket.to(message.groupId).emit('messageReceived',message)
     }).catch(error =>{
       socket.broadcast.emit(message.groupId,'getting error while saving message');
     });
-  }
-
-  @SubscribeMessage('joinGroup')
-  handlejoinGroup(socket: Socket, groupId: any): void {
-    console.log('Received message:', groupId);
-    socket.join(groupId);
   }
 }

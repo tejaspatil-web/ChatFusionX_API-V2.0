@@ -68,7 +68,9 @@ export class GroupService {
   
       const groups = await this.groupModel.find({
         _id: { $in: objectIds },
-      }).select('_id name description messages');
+      })
+      .sort({createdAt: -1})
+      .select('_id name description messages');
   
       return groups;
     } catch (error) {
