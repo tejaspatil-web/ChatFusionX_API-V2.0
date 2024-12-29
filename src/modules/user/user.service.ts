@@ -13,7 +13,7 @@ export class UserService {
   ) {}
 
   async getAllUsers(): Promise<User[]> {
-    return await this.userModel.find().exec();
+    return (await this.userModel.find().sort({createdAt: -1}).select('_id email name').exec());
   }
 
   async createUser(createUserDto: CreateUserDto): Promise<User> {

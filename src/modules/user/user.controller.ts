@@ -15,12 +15,12 @@ import { CreateUserDto, ValidateUserDto } from './dtos/user.dto';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get()
+  @Get('getAll')
   async getAllUsers(@Res() response: Response) {
     return this.userService
       .getAllUsers()
       .then((res) => {
-        response.status(HttpStatus.OK).send({ data: res });
+        response.status(HttpStatus.OK).send(res);
       })
       .catch((error) => {
         console.error(error);
