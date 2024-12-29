@@ -12,7 +12,7 @@ import { SaveMessageDto } from 'src/modules/group/dtos/group.dto';
 @WebSocketGateway({
   namespace: 'getway',
   cors: {
-    origin: ['http://localhost:4200', 'https://chatfusionx.web.app'],
+    origin: ['http://localhost:4200','https://chatfusionx.vercel.app','https://chatfusionx.web.app'],
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type'],
     credentials: true,
