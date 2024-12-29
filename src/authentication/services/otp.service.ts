@@ -6,8 +6,6 @@ import { createTransport } from 'nodemailer';
 import { resetPasswordDto, sendEmailDto } from '../dtos/otp.dto';
 import { generateOtp } from 'src/utils/common-utils';
 import * as handlebars from 'handlebars';
-import * as fs from 'fs';
-import * as path from 'path';
 import { CreateUserDto } from 'src/modules/user/dtos/user.dto';
 
 @Injectable()
@@ -105,7 +103,7 @@ export class OtpService {
               "
             >
               <p style="margin: 0">
-                &copy; {{year}} ChatfusionX. All rights reserved.
+                &copy; {{year}} ChatFusionX. All rights reserved.
               </p>
             </div>
           </div>
@@ -134,7 +132,7 @@ export class OtpService {
     });
 
     const mailOptions = {
-      from: '"ChatfusionX" <no-reply@chatfusionx.com>',
+      from: '"ChatFusionX" <chatfusionx@gmail.com>',
       to: sendEmailDto.email,
       subject: 'One-time verification code',
       html: htmlContent,
@@ -183,7 +181,7 @@ export class OtpService {
           </tr>
           <tr>
             <td style="background-color: #f4f4f4; text-align: center; padding: 15px; font-size: 12px; color: #888888;">
-              &copy; {{year}} ChatfusionX. All rights reserved
+              &copy; {{year}} ChatFusionX. All rights reserved
             </td>
           </tr>
         </table>
@@ -213,7 +211,7 @@ export class OtpService {
     });
 
     const mailOptions = {
-      from: '"ChatfusionX" <no-reply@chatfusionx.com>',
+      from: '"ChatFusionX" <chatfusionx@gmail.com>',
       to: resetPasswordDto.email,
       subject: 'Your New Password for Account Access',
       html: htmlContent,
