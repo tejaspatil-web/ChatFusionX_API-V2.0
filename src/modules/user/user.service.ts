@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './user.schema';
 import { Model, Types } from 'mongoose';
-import { CreateUserDto, ValidateUserDto } from './dtos/user.dto';
+import { AcceptRequestDto, AddRequestDto, CreateUserDto, RejectRequestDto, ValidateUserDto } from './dtos/user.dto';
 import * as bcrypt from 'bcrypt';
 import { generateRandomPassword } from 'src/utils/common-utils';
 
@@ -14,6 +14,10 @@ export class UserService {
 
   async getAllUsers(): Promise<User[]> {
     return (await this.userModel.find().sort({createdAt: -1}).select('_id email name').exec());
+  }
+
+  async getUserDetails(userId:string):Promise<User>{
+    return await this.userModel.findOne({ _id: userId });
   }
 
   async createUser(createUserDto: CreateUserDto): Promise<User> {
@@ -62,6 +66,56 @@ export class UserService {
       });
     } catch (error) {
       console.error('Error updating user with group ID:', error);
+      throw error;
+    }
+  }
+
+  async addRequest(userData:AddRequestDto): Promise<void> {
+    try {
+      await Promise.all([
+        this.userModel.findByIdAndUpdate(userData.userId, {
+          $addToSet: { requestPending: userData.requestUserId }
+        }),
+        this.userModel.findByIdAndUpdate(userData.requestUserId, {
+          $addToSet: { requests: userData.userId }
+        })
+      ]);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
+
+  async acceptRequest(userData:AcceptRequestDto): Promise<void> {
+    try {
+      await Promise.all([
+        this.userModel.findByIdAndUpdate(userData.userId, {
+          $addToSet: { addedUsers: userData.acceptUserId },
+          $pull: { requests: userData.acceptUserId }
+        }),
+        this.userModel.findByIdAndUpdate(userData.acceptUserId, {
+          $addToSet: { addedUsers: userData.userId },
+          $pull: { requestPending: userData.userId }
+        })
+      ]);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
+
+  async rejectRequest(userData:RejectRequestDto): Promise<void> {
+    try { 
+      await Promise.all([
+        this.userModel.findByIdAndUpdate(userData.userId, {
+          $pull: { requests: userData.rejectUserId }
+        }),
+        this.userModel.findByIdAndUpdate(userData.rejectUserId, {
+          $pull: { requestPending: userData.userId }
+        })
+      ]);
+    } catch (error) {
+      console.error(error);
       throw error;
     }
   }

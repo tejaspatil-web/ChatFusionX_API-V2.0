@@ -84,4 +84,18 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
         );
       });
   }
+
+  @SubscribeMessage('joinPrivateChat')
+  handleUserJoinPrivateChat(socket: Socket, userId: string) {
+    socket.join(userId);
+  }
+  
+  @SubscribeMessage('privateMessage')
+  handleDirectMessageOrNotification(socket: Socket, message: { type: string; senderId: string; receiverId: string; content: string }) {
+    if (message.type === 'notification') {
+      socket.to(message.receiverId).emit('notificationReceived', message);
+    } else {
+      socket.to(message.receiverId).emit('privateMessageReceived', message);
+    }
+  }  
 }
