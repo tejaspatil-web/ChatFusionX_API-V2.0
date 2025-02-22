@@ -1,0 +1,31 @@
+import { Controller, Get, HttpException, HttpStatus, Query, Res } from '@nestjs/common';
+import { ChatFusionXAIService } from './chatfusionx-ai.service';
+import { Response } from 'express';
+
+@Controller({ path: 'chatfusionx-ai', version: '1' })
+export class ChatFusionXAIController {
+  constructor(private readonly aiService: ChatFusionXAIService) {}
+
+  @Get('get-chat')
+  async getChat(
+  @Query('user_id') userId: string, 
+  @Res() response:Response) {
+    return await this.aiService.getChat(userId).then(res =>{
+      response.status(HttpStatus.OK).send({response:res})
+    }).catch(error =>{
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    })
+  }
+
+  @Get('generate')
+  async generate(
+  @Query('user_id') userId: string, 
+  @Query('prompt') prompt: string,
+  @Res() response:Response) {
+    return await this.aiService.getAiResponse(userId,prompt).then(res =>{
+      response.status(HttpStatus.OK).send({response:res})
+    }).catch(error =>{
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    })
+  }
+}

@@ -7,6 +7,8 @@ import { UserModule } from './modules/user/user.module';
 import { SocketModule } from './socket/socket.module';
 import { AuthModule } from './authentication/auth.module';
 import { GroupModule } from './modules/group/group.module';
+import { PrivateMessageModule } from './modules/private-message/private-message.module';
+import { ChatFusionXAIModule } from './modules/chatfusionx-ai/chatfusionx-ai.module';
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { GroupModule } from './modules/group/group.module';
     SocketModule,
     UserModule,
     GroupModule,
+    PrivateMessageModule,
+    ChatFusionXAIModule,
     AuthModule,
   ],
   controllers: [AppController],

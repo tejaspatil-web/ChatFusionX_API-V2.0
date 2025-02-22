@@ -8,6 +8,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { SocketService } from './socket.service';
 import { SaveMessageDto } from 'src/modules/group/dtos/group.dto';
+import { SavePrivateMessageDto } from 'src/modules/private-message/dtos/private-chat.dto';
 
 @WebSocketGateway({
   namespace: 'getway',
@@ -91,11 +92,33 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
   
   @SubscribeMessage('privateMessage')
-  handleDirectMessageOrNotification(socket: Socket, message: { type: string; senderId: string; receiverId: string; content: string }) {
+  handleDirectMessageOrNotification(socket: Socket, message: any) {
     if (message.type === 'notification') {
       socket.to(message.receiverId).emit('notificationReceived', message);
     } else {
-      socket.to(message.receiverId).emit('privateMessageReceived', message);
+      const senderId = message.userId
+      const chatId = this._socketService.generateChatId(senderId,message.receiverId)
+      const privateMessage:SavePrivateMessageDto = {
+        chatId:chatId,
+        message:{
+          userId:senderId,
+          userName:message.userName,
+          message:message.message,
+          time:message.time
+        }
+      }
+      this._socketService.savePrivateMessages(privateMessage)
+      .then((res) => {
+        console.log(res);
+        socket.to(message.receiverId).emit('privateMessageReceived', message);
+      })
+      .catch((error) => {
+        socket.broadcast.emit(
+          senderId,
+          'getting error while saving message',
+        );
+      });
+
     }
   }  
 }
