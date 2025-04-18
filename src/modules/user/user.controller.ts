@@ -13,7 +13,8 @@ import { Response } from 'express';
 import { UserService } from './user.service';
 import { AcceptRequestDto, AddRequestDto, RejectRequestDto, ValidateUserDto } from './dtos/user.dto';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
-
+import { Throttle } from '@nestjs/throttler';
+@Throttle({ medium: { limit: 20, ttl: 10000 } })
 @Controller({ path: 'user', version: '1' })
 export class UserController {
   constructor(private readonly userService: UserService) {}

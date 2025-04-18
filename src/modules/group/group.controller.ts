@@ -11,7 +11,9 @@ import { GroupService } from './group.service';
 import { CreateGroupDto, GetAllGroupsDto, JoinGroupDto } from './dtos/group.dto';
 import { Response } from 'express';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
+import { Throttle } from '@nestjs/throttler';
 
+@Throttle({ medium: { limit: 20, ttl: 10000 } })
 @Controller({ path: 'group', version: '1' })
 @UseGuards(JwtAuthGuard)
 export class GroupController {

@@ -3,7 +3,8 @@ import { PrivateMessageService } from "./private-message.service";
 import { Response } from "express";
 import { SavePrivateMessageDto } from "./dtos/private-chat.dto";
 import { JwtAuthGuard } from "src/guards/jwt-auth.guard";
-
+import { Throttle } from "@nestjs/throttler";
+@Throttle({ medium: { limit: 20, ttl: 10000 } })
 @Controller({ path: 'private', version: '1' })
 @UseGuards(JwtAuthGuard)
 export class PrivateMessageController {
