@@ -33,7 +33,7 @@ export class UserController {
   }
 
   @Get('getUser/:id')
-  @UseGuards(JwtAuthGuard)
+  //@UseGuards(JwtAuthGuard)
   async getUser(@Param('id') id:string,@Res() response: Response) {
     return this.userService
       .getUserDetails(id)
