@@ -17,7 +17,7 @@ import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
     ]),
     JwtModule.register({
       secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '3h' },
+      signOptions: { expiresIn: '5h' },
     }),
   ],
   controllers: [ChatFusionXAIController],

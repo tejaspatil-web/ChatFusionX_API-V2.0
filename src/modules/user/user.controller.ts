@@ -73,12 +73,6 @@ export class UserController {
       .validateUser(userData)
       .then((data) => {
         if (data.isUserValid) {
-          response.cookie('jwt',data.token,{
-            httpOnly:true,
-            secure:true,
-            sameSite:'lax',
-            maxAge: 1000 * 60 * 60 * 24 * 7
-          })
           response.status(HttpStatus.OK).send(data.userDetails);
         } else {
           throw new HttpException('Invalid password', HttpStatus.UNAUTHORIZED);

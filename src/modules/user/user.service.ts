@@ -47,7 +47,18 @@ export class UserService {
     if(isValid){
       token = await this.generateJwtToken(user.id);
     }
-    return {token:token, isUserValid: isValid,userDetails:user };
+    const userDetails = {
+      addedUsers:user.addedUsers,
+      adminGroupIds:user.adminGroupIds,
+      email:user.email,
+      id:user.id,
+      joinedGroupIds:user.joinedGroupIds,
+      name:user.name,
+      requestPending:user.requestPending,
+      requests:user.requests,
+      accessToken:token
+    }
+    return {token:token, isUserValid: isValid,userDetails:userDetails };
   }
 
 
@@ -142,7 +153,7 @@ export class UserService {
     const payload = { userId };
     return this.jwtService.sign(payload, {
       secret: process.env.JWT_SECRET,
-      expiresIn: '3h',
+      expiresIn: '5h',
     });
   }
 
