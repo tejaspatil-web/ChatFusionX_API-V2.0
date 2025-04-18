@@ -33,7 +33,7 @@ export class UserController {
   }
 
   @Get('getUser/:id')
-  //@UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async getUser(@Param('id') id:string,@Res() response: Response) {
     return this.userService
       .getUserDetails(id)
@@ -76,8 +76,8 @@ export class UserController {
           response.cookie('jwt',data.token,{
             httpOnly:true,
             secure:true,
-            sameSite:'strict',
-            maxAge: 3000 * 60 * 60
+            sameSite:'lax',
+            maxAge: 1000 * 60 * 60 * 24 * 7
           })
           response.status(HttpStatus.OK).send(data.userDetails);
         } else {
