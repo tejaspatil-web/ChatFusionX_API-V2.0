@@ -18,7 +18,7 @@ async function bootstrap() {
   app.enableCors({
     origin: ['http://localhost:4200','https://chatfusionx.vercel.app','https://chatfusionx.web.app'],
     methods: 'GET, POST, PUT, DELETE',
-    // allowedHeaders: 'Content-Type, Authorization',
+    allowedHeaders: 'Content-Type, Authorization',
     credentials: true,
   });
 

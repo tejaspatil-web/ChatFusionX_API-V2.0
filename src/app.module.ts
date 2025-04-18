@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
@@ -11,6 +11,7 @@ import { PrivateMessageModule } from './modules/private-message/private-message.
 import { ChatFusionXAIModule } from './modules/chatfusionx-ai/chatfusionx-ai.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { RemoveHeadersMiddleware } from './middlewares/remove-headers.middleware';
 
 @Module({
   imports: [
@@ -53,4 +54,10 @@ import { APP_GUARD } from '@nestjs/core';
 })
 export class AppModule {
   constructor() {}
+  configure(consumer: MiddlewareConsumer) {
+    // Apply the middleware globally
+    consumer
+      .apply(RemoveHeadersMiddleware)
+      .forRoutes('*');  // Apply to all routes, or specify specific routes
+  }
 }
