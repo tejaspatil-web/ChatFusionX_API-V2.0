@@ -1,9 +1,11 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Res } from "@nestjs/common";
+import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Res, UseGuards } from "@nestjs/common";
 import { PrivateMessageService } from "./private-message.service";
 import { Response } from "express";
 import { SavePrivateMessageDto } from "./dtos/private-chat.dto";
+import { JwtAuthGuard } from "src/guards/jwt-auth.guard";
 
 @Controller({ path: 'private', version: '1' })
+@UseGuards(JwtAuthGuard)
 export class PrivateMessageController {
   constructor(private _privateChatService:PrivateMessageService) {}
 

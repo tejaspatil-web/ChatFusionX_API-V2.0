@@ -5,12 +5,15 @@ import {
   HttpStatus,
   Post,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { GroupService } from './group.service';
 import { CreateGroupDto, GetAllGroupsDto, JoinGroupDto } from './dtos/group.dto';
 import { Response } from 'express';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 
 @Controller({ path: 'group', version: '1' })
+@UseGuards(JwtAuthGuard)
 export class GroupController {
   constructor(private readonly groupService:GroupService) {}
 

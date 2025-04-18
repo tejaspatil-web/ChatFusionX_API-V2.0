@@ -1,8 +1,10 @@
-import { Controller, Get, HttpException, HttpStatus, Query, Res } from '@nestjs/common';
+import { Controller, Get, HttpException, HttpStatus, Query, Res, UseGuards } from '@nestjs/common';
 import { ChatFusionXAIService } from './chatfusionx-ai.service';
 import { Response } from 'express';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 
 @Controller({ path: 'chatfusionx-ai', version: '1' })
+@UseGuards(JwtAuthGuard)
 export class ChatFusionXAIController {
   constructor(private readonly aiService: ChatFusionXAIService) {}
 

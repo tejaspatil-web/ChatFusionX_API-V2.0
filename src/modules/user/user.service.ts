@@ -5,11 +5,13 @@ import { Model, Types } from 'mongoose';
 import { AcceptRequestDto, AddRequestDto, CreateUserDto, RejectRequestDto, ValidateUserDto } from './dtos/user.dto';
 import * as bcrypt from 'bcrypt';
 import { generateRandomPassword } from 'src/utils/common-utils';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<User>,
+    private jwtService: JwtService
   ) {}
 
   async getAllUsers(): Promise<User[]> {
@@ -34,14 +36,18 @@ export class UserService {
 
   async validateUser(
     userData: ValidateUserDto,
-  ): Promise<{ isUserValid: boolean,userDetails:any }> {
+  ): Promise<{token:string, isUserValid: boolean,userDetails:any }> {
     const { email, password } = userData;
     const user = await this.userModel.findOne({ email: email });
     if (!user) {
       throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
     }
     const isValid = await bcrypt.compare(password, user.password);
-    return { isUserValid: isValid,userDetails:user };
+    let token = '';
+    if(isValid){
+      token = await this.generateJwtToken(user.id);
+    }
+    return {token:token, isUserValid: isValid,userDetails:user };
   }
 
 
@@ -131,4 +137,13 @@ export class UserService {
       throw {status:404,message:'User not found'}
     }
   }
+
+  async generateJwtToken(userId: string): Promise<string> {
+    const payload = { userId };
+    return this.jwtService.sign(payload, {
+      secret: process.env.JWT_SECRET,
+      expiresIn: '3h',
+    });
+  }
+
 }

@@ -7,16 +7,19 @@ import {
   Param,
   Post,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { UserService } from './user.service';
-import { AcceptRequestDto, AddRequestDto, CreateUserDto, RejectRequestDto, ValidateUserDto } from './dtos/user.dto';
+import { AcceptRequestDto, AddRequestDto, RejectRequestDto, ValidateUserDto } from './dtos/user.dto';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 
 @Controller({ path: 'user', version: '1' })
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get('getAll')
+  @UseGuards(JwtAuthGuard)
   async getAllUsers(@Res() response: Response) {
     return this.userService
       .getAllUsers()
@@ -30,6 +33,7 @@ export class UserController {
   }
 
   @Get('getUser/:id')
+  @UseGuards(JwtAuthGuard)
   async getUser(@Param('id') id:string,@Res() response: Response) {
     return this.userService
       .getUserDetails(id)
@@ -69,6 +73,12 @@ export class UserController {
       .validateUser(userData)
       .then((data) => {
         if (data.isUserValid) {
+          response.cookie('jwt',data.token,{
+            httpOnly:true,
+            secure:true,
+            sameSite:'strict',
+            maxAge: 3000 * 60 * 60
+          })
           response.status(HttpStatus.OK).send(data.userDetails);
         } else {
           throw new HttpException('Invalid password', HttpStatus.UNAUTHORIZED);
@@ -82,6 +92,7 @@ export class UserController {
 
 
   @Post('sendRequest')
+  @UseGuards(JwtAuthGuard)
   async addRequest(
     @Res() response: Response,
     @Body() userData: AddRequestDto,
@@ -98,6 +109,7 @@ export class UserController {
   }
 
   @Post('acceptRequest')
+  @UseGuards(JwtAuthGuard)
   async acceptRequest(
     @Res() response: Response,
     @Body() userData: AcceptRequestDto,
@@ -114,6 +126,7 @@ export class UserController {
   }
 
   @Post('rejectRequest')
+  @UseGuards(JwtAuthGuard)
   async rejectRequest(
     @Res() response: Response,
     @Body() userData: RejectRequestDto,
