@@ -1,4 +1,4 @@
-import { Controller, Get, HttpException, HttpStatus, Query, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpException, HttpStatus, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { ChatFusionXAIService } from './chatfusionx-ai.service';
 import { Response } from 'express';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
@@ -21,10 +21,10 @@ export class ChatFusionXAIController {
     })
   }
 
-  @Get('generate')
+  @Post('generate')
   async generate(
-  @Query('user_id') userId: string, 
-  @Query('prompt') prompt: string,
+  @Body('user_id') userId: string, 
+  @Body('prompt') prompt: string,
   @Res() response:Response) {
     return await this.aiService.getAiResponse(userId,prompt).then(res =>{
       response.status(HttpStatus.OK).send({response:res})
