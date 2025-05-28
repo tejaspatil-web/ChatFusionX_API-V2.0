@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './user.schema';
 import { Model, Types } from 'mongoose';
-import { AcceptRequestDto, AddRequestDto, CreateUserDto, RejectRequestDto, ValidateUserDto } from './dtos/user.dto';
+import { AcceptRequestDto, AddRequestDto, CreateUserDto, RejectRequestDto, updatePasswordDto, ValidateUserDto } from './dtos/user.dto';
 import * as bcrypt from 'bcrypt';
 import { generateRandomPassword } from 'src/utils/common-utils';
 import { JwtService } from '@nestjs/jwt';
@@ -85,6 +85,25 @@ export class UserService {
       console.error('Error updating user with group ID:', error);
       throw error;
     }
+  }
+
+    async updatePassword(updatePassword: updatePasswordDto): Promise<User> {
+    const { userId,oldPassword,newPassword } = updatePassword;
+    const objectId = new Types.ObjectId(userId);
+    const user = await this.userModel.findOne({ _id: objectId });
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+    
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if(!isMatch){
+      throw new HttpException('Entered wrong old password.', HttpStatus.BAD_REQUEST);
+    }
+
+  const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+  user.password = hashedNewPassword;
+
+  return await user.save();
   }
 
   async addRequest(userData:AddRequestDto): Promise<void> {

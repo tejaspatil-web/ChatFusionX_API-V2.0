@@ -22,3 +22,9 @@ export class RejectRequestDto{
   userId:string;
   rejectUserId:string;
 }
+
+export class updatePasswordDto{
+ userId:string;
+ oldPassword:string;
+ newPassword:string;
+}

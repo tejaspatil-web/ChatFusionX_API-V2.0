@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { UserService } from './user.service';
-import { AcceptRequestDto, AddRequestDto, RejectRequestDto, ValidateUserDto } from './dtos/user.dto';
+import { AcceptRequestDto, AddRequestDto, RejectRequestDto, updatePasswordDto, ValidateUserDto } from './dtos/user.dto';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { Throttle } from '@nestjs/throttler';
 @Throttle({ medium: { limit: 20, ttl: 10000 } })
@@ -85,6 +85,23 @@ export class UserController {
       });
   }
 
+  @Post('updatePassword')
+  async createUser(
+    @Res() response: Response,
+    @Body() updatePasswordDto: updatePasswordDto,
+  ) {
+    return this.userService
+      .updatePassword(updatePasswordDto)
+      .then((res) => {
+        response
+          .status(HttpStatus.OK)
+          .send({ message: 'Password Updated Successfully' });
+      })
+      .catch((error: HttpException) => {
+        console.error(error);
+        throw new HttpException(error.message, error.getStatus());
+      });
+  }
 
   @Post('sendRequest')
   @UseGuards(JwtAuthGuard)
