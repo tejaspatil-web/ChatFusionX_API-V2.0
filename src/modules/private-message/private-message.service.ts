@@ -11,23 +11,27 @@ export class PrivateMessageService {
     private readonly privateChatModel: Model<PrivateChat>,
   ) {}
 
-   generateChatId(senderId: string, receiverId: string): string {
+  generateChatId(senderId: string, receiverId: string): string {
     return `chat_${[senderId, receiverId].sort().join('_')}`;
   }
 
-  async getPrivateMessages(senderId:string,receiverId: string) {
+  async getPrivateMessages(senderId: string, receiverId: string) {
     try {
-      const chatId = this.generateChatId(senderId,receiverId);
-      const chat = await this.privateChatModel.findOne({_id:chatId})
-      .select('messages -_id')
-      .lean();
+      const chatId = this.generateChatId(senderId, receiverId);
+      const chat = await this.privateChatModel
+        .findOne({ _id: chatId })
+        .select('messages -_id')
+        .lean();
       if (chat) {
         return chat;
       } else {
-        return {messages:[]};
+        return { messages: [] };
       }
     } catch (error) {
-      throw { status: HttpStatus.INTERNAL_SERVER_ERROR, message: 'internal server error' };
+      throw {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'internal server error',
+      };
     }
   }
 
@@ -36,7 +40,7 @@ export class PrivateMessageService {
       { _id: privateMessage.chatId },
       {
         $push: {
-          chatId:privateMessage.chatId,
+          chatId: privateMessage.chatId,
           messages: {
             userId: new Types.ObjectId(privateMessage.message.userId),
             userName: privateMessage.message.userName,
@@ -45,13 +49,24 @@ export class PrivateMessageService {
           },
         },
       },
-      { new: true, //Returns the updated document instead of the old one.
-        upsert:true //Creates a new document if no match is found.
+      {
+        new: true, //Returns the updated document instead of the old one.
+        upsert: true, //Creates a new document if no match is found.
       },
     );
   }
   catch(error) {
     console.error(error);
     throw error;
+  }
+
+  async updateUserName(userId: string, userName: string) {
+    const userObjectId = new Types.ObjectId(userId);
+    const updateResult = await this.privateChatModel.updateMany(
+      { 'messages.userId': userObjectId },
+      { $set: { 'messages.$[elem].userName': userName } },
+      { arrayFilters: [{ 'elem.userId': userObjectId }] },
+    );
+    return updateResult;
   }
 }

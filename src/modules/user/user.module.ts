@@ -5,6 +5,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './user.schema';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { JwtModule } from '@nestjs/jwt';
+import { CloudinaryService } from './cloudinary.service';
+import { CloudinaryProvider } from 'src/connections/cloudinary/cloudinary.provider';
+import { PrivateMessageModule } from '../private-message/private-message.module';
 
 @Module({
   imports: [
@@ -15,10 +18,11 @@ import { JwtModule } from '@nestjs/jwt';
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '5h' },
     }),
+    PrivateMessageModule,
   ],
   controllers: [UserController],
-  providers: [UserService,JwtAuthGuard],
-  exports: [UserService,],
+  providers: [UserService, JwtAuthGuard, CloudinaryService, CloudinaryProvider],
+  exports: [UserService],
 })
 export class UserModule {
   constructor() {}

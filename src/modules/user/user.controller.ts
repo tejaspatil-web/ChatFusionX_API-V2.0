@@ -7,17 +7,30 @@ import {
   Param,
   Post,
   Res,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { UserService } from './user.service';
-import { AcceptRequestDto, AddRequestDto, RejectRequestDto, updatePasswordDto, ValidateUserDto } from './dtos/user.dto';
+import { CloudinaryService } from './cloudinary.service';
+import {
+  AcceptRequestDto,
+  AddRequestDto,
+  RejectRequestDto,
+  updatePasswordDto,
+  ValidateUserDto,
+} from './dtos/user.dto';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { Throttle } from '@nestjs/throttler';
+import { FileInterceptor } from '@nestjs/platform-express';
 @Throttle({ medium: { limit: 20, ttl: 10000 } })
 @Controller({ path: 'user', version: '1' })
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
   @Get('getAll')
   @UseGuards(JwtAuthGuard)
@@ -35,7 +48,7 @@ export class UserController {
 
   @Get('getUser/:id')
   @UseGuards(JwtAuthGuard)
-  async getUser(@Param('id') id:string,@Res() response: Response) {
+  async getUser(@Param('id') id: string, @Res() response: Response) {
     return this.userService
       .getUserDetails(id)
       .then((res) => {
@@ -86,7 +99,7 @@ export class UserController {
   }
 
   @Post('updatePassword')
-  async createUser(
+  async updatePassword(
     @Res() response: Response,
     @Body() updatePasswordDto: updatePasswordDto,
   ) {
@@ -105,14 +118,11 @@ export class UserController {
 
   @Post('sendRequest')
   @UseGuards(JwtAuthGuard)
-  async addRequest(
-    @Res() response: Response,
-    @Body() userData: AddRequestDto,
-  ) {
+  async addRequest(@Res() response: Response, @Body() userData: AddRequestDto) {
     return await this.userService
       .addRequest(userData)
       .then((data) => {
-          response.status(HttpStatus.OK).send(data);
+        response.status(HttpStatus.OK).send(data);
       })
       .catch((error: HttpException) => {
         console.error(error);
@@ -129,7 +139,7 @@ export class UserController {
     return await this.userService
       .acceptRequest(userData)
       .then((data) => {
-          response.status(HttpStatus.OK).send(data);
+        response.status(HttpStatus.OK).send(data);
       })
       .catch((error: HttpException) => {
         console.error(error);
@@ -146,11 +156,34 @@ export class UserController {
     return await this.userService
       .rejectRequest(userData)
       .then((data) => {
-          response.status(HttpStatus.OK).send(data);
+        response.status(HttpStatus.OK).send(data);
       })
       .catch((error: HttpException) => {
         console.error(error);
         throw new HttpException(error.message, error.getStatus());
       });
+  }
+
+  @Post('upload-profile')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadProfileImage(
+    @UploadedFile() file: any,
+    @Body('userName') userName: string,
+    @Body('userId') userId: string,
+  ) {
+    let result: any;
+    try {
+      if (file) {
+        result = await this.cloudinaryService.uploadUserProfile(file);
+        await this.userService.updateProfileUrl(
+          userId,
+          result?.secure_url || '',
+        );
+      }
+      await this.userService.updateUserName(userId, userName);
+    } catch (error) {
+      throw new HttpException(error.message, error.getStatus());
+    }
+    return { url: result?.secure_url || '' };
   }
 }
