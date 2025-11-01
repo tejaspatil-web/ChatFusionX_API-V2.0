@@ -13,7 +13,7 @@ export class ChatFusionXAIService {
     private readonly chatFusionXAIModel: Model<ChatFusionXAI>,
   ) {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    this.model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    this.model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
   }
 
   async getChat(userId): Promise<any> {

@@ -121,15 +121,29 @@ export class OtpService {
       year: new Date().getFullYear(),
     });
 
-    const transporter = createTransport({
-      service: 'gmail',
-      secure: true,
-      port: process.env.EMAILPORT,
+    // const transporter = createTransport({
+    //   service: 'gmail',
+    //   secure: true,
+    //   port: process.env.EMAILPORT,
+    //   auth: {
+    //     user: process.env.EMAIL_USERNAME,
+    //     pass: process.env.EMAIL_PASSWORD,
+    //   },
+    // });
+
+      const transporter = createTransport({
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false, // CRITICAL: Must be false for port 587 (STARTTLS)
       auth: {
         user: process.env.EMAIL_USERNAME,
-        pass: process.env.EMAIL_PASSWORD,
+        pass: process.env.EMAIL_PASSWORD, // Must be App Password
       },
+      tls: {
+        rejectUnauthorized: false
+      }
     });
+
 
     const mailOptions = {
       from: '"ChatFusionX" <chatfusionx@gmail.com>',
@@ -200,14 +214,27 @@ export class OtpService {
       password:resetPasswordDto.password
     });
 
+    // const transporter = createTransport({
+    //   service: 'gmail',
+    //   secure: true,
+    //   port: process.env.EMAILPORT,
+    //   auth: {
+    //     user: process.env.EMAIL_USERNAME,
+    //     pass: process.env.EMAIL_PASSWORD,
+    //   },
+    // });
+
     const transporter = createTransport({
-      service: 'gmail',
-      secure: true,
-      port: process.env.EMAILPORT,
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false, // CRITICAL: Must be false for port 587 (STARTTLS)
       auth: {
         user: process.env.EMAIL_USERNAME,
-        pass: process.env.EMAIL_PASSWORD,
+        pass: process.env.EMAIL_PASSWORD, // Must be App Password
       },
+      tls: {
+        rejectUnauthorized: false
+      }
     });
 
     const mailOptions = {
