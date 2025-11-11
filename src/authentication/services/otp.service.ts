@@ -3,16 +3,31 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Otp } from '../schemas/otp.schema';
 import { Model } from 'mongoose';
 import { createTransport } from 'nodemailer';
+import * as Sib from 'sib-api-v3-sdk';
 import { resetPasswordDto, sendEmailDto } from '../dtos/otp.dto';
 import { generateOtp } from 'src/utils/common-utils';
 import * as handlebars from 'handlebars';
 import { CreateUserDto } from 'src/modules/user/dtos/user.dto';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class OtpService {
-  constructor(@InjectModel(Otp.name) private readonly OtpModel: Model<Otp>) {}
+  private readonly tranEmailApi: Sib.TransactionalEmailsApi;
+
+  constructor(@InjectModel(Otp.name) private readonly OtpModel: Model<Otp>,
+    private readonly configService: ConfigService) {
+    const client = Sib.ApiClient.instance;
+    const apiKey = client.authentications['api-key'];
+    apiKey.apiKey = this.configService.get<string>('BREVO_API_KEY');
+    this.tranEmailApi = new Sib.TransactionalEmailsApi();
+  }
 
   async sendOtpEmail(sendEmailDto: sendEmailDto): Promise<void> {
+    const sender = {
+      email: this.configService.get<string>('BREVO_SENDER_EMAIL'),
+      name: this.configService.get<string>('BREVO_SENDER_NAME'),
+    };
+
     const otp = generateOtp();
 
     // Compile the template with Handlebars
@@ -121,6 +136,7 @@ export class OtpService {
       year: new Date().getFullYear(),
     });
 
+    //--------------Commented Code For Node Mailer ----------------------------------//
     // const transporter = createTransport({
     //   service: 'gmail',
     //   secure: true,
@@ -131,30 +147,40 @@ export class OtpService {
     //   },
     // });
 
-      const transporter = createTransport({
-      host: 'smtp.gmail.com',
-      port: 587,
-      secure: false, // CRITICAL: Must be false for port 587 (STARTTLS)
-      auth: {
-        user: process.env.EMAIL_USERNAME,
-        pass: process.env.EMAIL_PASSWORD, // Must be App Password
-      },
-      tls: {
-        rejectUnauthorized: false
-      }
-    });
+    //   const transporter = createTransport({
+    //   host: 'smtp.gmail.com',
+    //   port: 587,
+    //   secure: false, // CRITICAL: Must be false for port 587 (STARTTLS)
+    //   auth: {
+    //     user: process.env.EMAIL_USERNAME,
+    //     pass: process.env.EMAIL_PASSWORD, // Must be App Password
+    //   },
+    //   tls: {
+    //     rejectUnauthorized: false
+    //   }
+    // });
 
+
+    // const mailOptions = {
+    //   from: '"ChatFusionX" <chatfusionx@gmail.com>',
+    //   to: sendEmailDto.email,
+    //   subject: 'One-time verification code',
+    //   html: htmlContent,
+    // };
+
+
+    const receivers = [{ email: sendEmailDto.email }];
 
     const mailOptions = {
-      from: '"ChatFusionX" <chatfusionx@gmail.com>',
-      to: sendEmailDto.email,
-      subject: 'One-time verification code',
-      html: htmlContent,
-    };
+      sender,
+      to: receivers,
+      subject: `One-time verification code`,
+      htmlContent,
+    }
 
     try {
       await this.saveOtp(sendEmailDto.email, otp);
-      await transporter.sendMail(mailOptions);
+      await this.tranEmailApi.sendTransacEmail(mailOptions);
       console.log(`OTP sent to ${sendEmailDto.email}`);
     } catch (error) {
       throw new HttpException(
@@ -165,6 +191,11 @@ export class OtpService {
   }
 
   async sendEmailResetPassword(resetPasswordDto: resetPasswordDto): Promise<void> {
+    const sender = {
+      email: this.configService.get<string>('BREVO_SENDER_EMAIL'),
+      name: this.configService.get<string>('BREVO_SENDER_NAME'),
+    };
+
     // Compile the template with Handlebars
     const template = handlebars.compile(`<!DOCTYPE html>
 <html>
@@ -210,10 +241,11 @@ export class OtpService {
     const htmlContent = template({
       userName: resetPasswordDto.userName,
       year: new Date().getFullYear(),
-      email:resetPasswordDto.email,
-      password:resetPasswordDto.password
+      email: resetPasswordDto.email,
+      password: resetPasswordDto.password
     });
 
+    //--------------Commented Code For Node Mailer ----------------------------------//
     // const transporter = createTransport({
     //   service: 'gmail',
     //   secure: true,
@@ -224,28 +256,37 @@ export class OtpService {
     //   },
     // });
 
-    const transporter = createTransport({
-      host: 'smtp.gmail.com',
-      port: 587,
-      secure: false, // CRITICAL: Must be false for port 587 (STARTTLS)
-      auth: {
-        user: process.env.EMAIL_USERNAME,
-        pass: process.env.EMAIL_PASSWORD, // Must be App Password
-      },
-      tls: {
-        rejectUnauthorized: false
-      }
-    });
+    // const transporter = createTransport({
+    //   host: 'smtp.gmail.com',
+    //   port: 587,
+    //   secure: false, // CRITICAL: Must be false for port 587 (STARTTLS)
+    //   auth: {
+    //     user: process.env.EMAIL_USERNAME,
+    //     pass: process.env.EMAIL_PASSWORD, // Must be App Password
+    //   },
+    //   tls: {
+    //     rejectUnauthorized: false
+    //   }
+    // });
+
+    // const mailOptions = {
+    //   from: '"ChatFusionX" <chatfusionx@gmail.com>',
+    //   to: resetPasswordDto.email,
+    //   subject: 'Your New Password for Account Access',
+    //   html: htmlContent,
+    // };
+
+    const receivers = [{ email: resetPasswordDto.email }];
 
     const mailOptions = {
-      from: '"ChatFusionX" <chatfusionx@gmail.com>',
-      to: resetPasswordDto.email,
-      subject: 'Your New Password for Account Access',
-      html: htmlContent,
-    };
+      sender,
+      to: receivers,
+      subject: `Your New Password for Account Access`,
+      htmlContent,
+    }
 
     try {
-      await transporter.sendMail(mailOptions);
+      await this.tranEmailApi.sendTransacEmail(mailOptions);
       console.log(`recovery email sent to ${resetPasswordDto.email}`);
     } catch (error) {
       throw new Error(error);
