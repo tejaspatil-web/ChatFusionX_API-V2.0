@@ -75,6 +75,36 @@ export class UserService {
     return { token: token, isUserValid: isValid, userDetails: userDetails };
   }
 
+  async googleWithGoogle(userDetails: CreateUserDto) {
+    let user = await this.userModel.findOne({ email: userDetails.email });
+
+    // If user not found then create
+    if (!user) {
+      user = await this.userModel.create(userDetails);
+    }
+
+    const token = await this.generateJwtToken(user.id);
+
+    const responseUser = {
+      addedUsers: user.addedUsers,
+      adminGroupIds: user.adminGroupIds,
+      email: user.email,
+      id: user.id,
+      joinedGroupIds: user.joinedGroupIds,
+      name: user.name,
+      profileUrl: user.profileUrl || "",
+      requestPending: user.requestPending,
+      requests: user.requests,
+      accessToken: token,
+    };
+
+    return {
+      token,
+      isUserValid: true,
+      userDetails: responseUser,
+    };
+  }
+
   async assignGroupToUser(userId: string, groupId: string) {
     try {
       await this.userModel.findByIdAndUpdate(userId, {

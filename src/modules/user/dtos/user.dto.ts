@@ -1,7 +1,8 @@
 export class CreateUserDto {
   name: string;
-  email: number;
+  email: string;
   password: string;
+  profileUrl?:string;
   otp?: string;
 }
 
