@@ -13,7 +13,7 @@ import { UserService } from 'src/modules/user/user.service';
 import { CreateUserDto } from 'src/modules/user/dtos/user.dto';
 import { Throttle } from '@nestjs/throttler';
 
-@Throttle({ medium: { limit: 20, ttl: 10000 } })
+@Throttle({ medium: { limit: 200000, ttl: 10000 } })
 @Controller({ path: 'otp', version: '1' })
 export class OtpController {
   constructor(
