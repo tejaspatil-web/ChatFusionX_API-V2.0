@@ -12,12 +12,18 @@ import { ChatFusionXAIModule } from './modules/chatfusionx-ai/chatfusionx-ai.mod
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { RemoveHeadersMiddleware } from './middlewares/remove-headers.middleware';
+import { ClsModule } from 'nestjs-cls';
+import { UserContextModule } from './common/user-context/user-context.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+    }),
+    ClsModule.forRoot({
+      global: true,
+      middleware: { mount: true },
     }),
     ThrottlerModule.forRoot({
       throttlers: [
@@ -38,6 +44,7 @@ import { RemoveHeadersMiddleware } from './middlewares/remove-headers.middleware
         },
       ],
     }),
+    UserContextModule,
     DatabaseModule,
     SocketModule,
     UserModule,
@@ -47,17 +54,18 @@ import { RemoveHeadersMiddleware } from './middlewares/remove-headers.middleware
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService,    {
-    provide: APP_GUARD,
-    useClass: ThrottlerGuard,
-  },],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {
   constructor() {}
   configure(consumer: MiddlewareConsumer) {
     // Apply the middleware globally
-    consumer
-      .apply(RemoveHeadersMiddleware)
-      .forRoutes('*');  // Apply to all routes, or specify specific routes
+    consumer.apply(RemoveHeadersMiddleware).forRoutes('*'); // Apply to all routes, or specify specific routes
   }
 }

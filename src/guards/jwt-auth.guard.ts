@@ -1,17 +1,21 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { CanActivate, ExecutionContext } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { ClsService } from 'nestjs-cls';
 import { Observable } from 'rxjs';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  constructor(private jwtService: JwtService) {}
+  constructor(
+    private jwtService: JwtService,
+    private cls: ClsService,
+  ) {}
 
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest();
-    
+
     const token = request.headers?.authorization?.split(' ')[1];
 
     if (!token) {
@@ -19,8 +23,17 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     try {
-      const decoded = this.jwtService.verify(token, { secret: process.env.JWT_SECRET });
+      const decoded = this.jwtService.verify(token, {
+        secret: process.env.JWT_SECRET,
+      });
       request.user = decoded;
+
+      this.cls.set('user', {
+        id: decoded.userId,
+        name: decoded.userName,
+        email: decoded.userEmail,
+      });
+
       return true;
     } catch (error) {
       throw new UnauthorizedException('Invalid or expired token.');

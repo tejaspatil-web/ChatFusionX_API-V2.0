@@ -58,7 +58,7 @@ export class UserService {
     const isValid = await bcrypt.compare(password, user.password);
     let token = '';
     if (isValid) {
-      token = await this.generateJwtToken(user.id);
+      token = await this.generateJwtToken(user.id, user.name, user.email);
     }
     const userDetails = {
       addedUsers: user.addedUsers,
@@ -71,6 +71,7 @@ export class UserService {
       requestPending: user.requestPending,
       requests: user.requests,
       accessToken: token,
+      isPasswordSet: user.password ? true : false,
     };
     return { token: token, isUserValid: isValid, userDetails: userDetails };
   }
@@ -83,7 +84,7 @@ export class UserService {
       user = await this.userModel.create(userDetails);
     }
 
-    const token = await this.generateJwtToken(user.id);
+    const token = await this.generateJwtToken(user.id, user.name, user.email);
 
     const responseUser = {
       addedUsers: user.addedUsers,
@@ -92,10 +93,11 @@ export class UserService {
       id: user.id,
       joinedGroupIds: user.joinedGroupIds,
       name: user.name,
-      profileUrl: user.profileUrl || "",
+      profileUrl: user.profileUrl || '',
       requestPending: user.requestPending,
       requests: user.requests,
       accessToken: token,
+      isPasswordSet: user.password ? true : false,
     };
 
     return {
@@ -138,12 +140,14 @@ export class UserService {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
 
-    const isMatch = await bcrypt.compare(oldPassword, user.password);
-    if (!isMatch) {
-      throw new HttpException(
-        'Entered wrong old password.',
-        HttpStatus.BAD_REQUEST,
-      );
+    if (user.password) {
+      const isMatch = await bcrypt.compare(oldPassword, user.password);
+      if (!isMatch) {
+        throw new HttpException(
+          'Entered wrong old password.',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
     }
 
     const hashedNewPassword = await bcrypt.hash(newPassword, 10);
@@ -216,8 +220,12 @@ export class UserService {
     }
   }
 
-  async generateJwtToken(userId: string): Promise<string> {
-    const payload = { userId };
+  async generateJwtToken(
+    userId: string,
+    userName: string,
+    userEmail: string,
+  ): Promise<string> {
+    const payload = { userId, userName, userEmail };
     return this.jwtService.sign(payload, {
       secret: process.env.JWT_SECRET,
       expiresIn: '5h',

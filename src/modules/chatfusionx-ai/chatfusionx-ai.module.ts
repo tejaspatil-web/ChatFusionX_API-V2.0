@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ChatFusionXAI, ChatFusionXAISchema } from './chatfusionx-ai.schema';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
+import { UserContextModule } from 'src/common/user-context/user-context.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '5h' },
     }),
+    UserContextModule,
   ],
   controllers: [ChatFusionXAIController],
   providers: [ChatFusionXAIService, JwtAuthGuard],
