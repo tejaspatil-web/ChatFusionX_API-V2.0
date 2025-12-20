@@ -16,6 +16,7 @@ import { ClsModule } from 'nestjs-cls';
 import { UserContextModule } from './common/user-context/user-context.module';
 import { AccessControlModule } from 'nest-access-control';
 import { roles } from './common/rbac/roles';
+import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { roles } from './common/rbac/roles';
     GroupModule,
     PrivateMessageModule,
     ChatFusionXAIModule,
+    AdminModule,
     AuthModule,
   ],
   controllers: [AppController],
