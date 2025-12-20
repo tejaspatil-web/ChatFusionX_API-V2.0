@@ -25,19 +25,22 @@ export class UserService {
 
   async getAllUsers(): Promise<User[]> {
     return await this.userModel
-      .find()
+      .find({ isDeleted: false })
       .sort({ createdAt: -1 })
       .select('_id email name profileUrl')
       .exec();
   }
 
   async getUserDetails(userId: string): Promise<User> {
-    return await this.userModel.findOne({ _id: userId });
+    return await this.userModel.findOne({ _id: userId, isDeleted: false });
   }
 
   async createUser(createUserDto: CreateUserDto): Promise<User> {
     const { email } = createUserDto;
-    const user = await this.userModel.findOne({ email: email });
+    const user = await this.userModel.findOne({
+      email: email,
+      isDeleted: false,
+    });
     if (user) {
       throw new HttpException('User already exists', HttpStatus.CONFLICT);
     }
@@ -51,7 +54,10 @@ export class UserService {
     userData: ValidateUserDto,
   ): Promise<{ token: string; isUserValid: boolean; userDetails: any }> {
     const { email, password } = userData;
-    const user = await this.userModel.findOne({ email: email });
+    const user = await this.userModel.findOne({
+      email: email,
+      isDeleted: false,
+    });
     if (!user) {
       throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
     }
@@ -80,7 +86,10 @@ export class UserService {
   }
 
   async googleWithGoogle(userDetails: CreateUserDto) {
-    let user = await this.userModel.findOne({ email: userDetails.email });
+    let user = await this.userModel.findOne({
+      email: userDetails.email,
+      isDeleted: false,
+    });
 
     // If user not found then create
     if (!user) {
@@ -215,7 +224,10 @@ export class UserService {
   async resetPassword(
     email: string,
   ): Promise<{ password: string; user: User }> {
-    const user = await this.userModel.findOne({ email: email });
+    const user = await this.userModel.findOne({
+      email: email,
+      isDeleted: false,
+    });
     if (user) {
       const randomPassword = generateRandomPassword();
       const hashedPassword = await bcrypt.hash(randomPassword, 10);

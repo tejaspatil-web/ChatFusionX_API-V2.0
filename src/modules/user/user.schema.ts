@@ -40,6 +40,9 @@ export class User {
   // Array of user IDs to whom this user has sent requests (pending approval)
   @Prop({ type: [{ type: Types.ObjectId, ref: 'User' }] })
   requestPending: Types.ObjectId[];
+
+  @Prop({ type: Boolean, default: false })
+  isDeleted: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
