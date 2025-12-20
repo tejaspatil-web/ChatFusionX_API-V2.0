@@ -13,10 +13,11 @@ import { ChatFusionXAIService } from './chatfusionx-ai.service';
 import { Response } from 'express';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { Throttle } from '@nestjs/throttler';
+import { ACGuard } from 'nest-access-control';
 
 @Throttle({ medium: { limit: 20, ttl: 10000 } })
 @Controller({ path: 'chatfusionx-ai', version: '1' })
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, ACGuard)
 export class ChatFusionXAIController {
   constructor(private readonly aiService: ChatFusionXAIService) {}
 

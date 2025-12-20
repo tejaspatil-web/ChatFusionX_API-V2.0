@@ -29,9 +29,10 @@ export class JwtAuthGuard implements CanActivate {
       request.user = decoded;
 
       this.cls.set('user', {
-        id: decoded.userId,
-        name: decoded.userName,
-        email: decoded.userEmail,
+        id: decoded.sub,
+        name: decoded.name,
+        email: decoded.email,
+        roles: decoded.roles,
       });
 
       return true;

@@ -14,6 +14,8 @@ import { APP_GUARD } from '@nestjs/core';
 import { RemoveHeadersMiddleware } from './middlewares/remove-headers.middleware';
 import { ClsModule } from 'nestjs-cls';
 import { UserContextModule } from './common/user-context/user-context.module';
+import { AccessControlModule } from 'nest-access-control';
+import { roles } from './common/rbac/roles';
 
 @Module({
   imports: [
@@ -25,6 +27,7 @@ import { UserContextModule } from './common/user-context/user-context.module';
       global: true,
       middleware: { mount: true },
     }),
+    AccessControlModule.forRoles(roles),
     ThrottlerModule.forRoot({
       throttlers: [
         {

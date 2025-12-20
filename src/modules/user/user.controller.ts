@@ -24,6 +24,7 @@ import {
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { Throttle } from '@nestjs/throttler';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ACGuard, UseRoles } from 'nest-access-control';
 @Throttle({ medium: { limit: 20, ttl: 10000 } })
 @Controller({ path: 'user', version: '1' })
 export class UserController {
@@ -33,7 +34,12 @@ export class UserController {
   ) {}
 
   @Get('getAll')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, ACGuard)
+  @UseRoles({
+    resource: 'user',
+    action: 'read',
+    possession: 'any',
+  })
   async getAllUsers(@Res() response: Response) {
     return this.userService
       .getAllUsers()
@@ -47,7 +53,12 @@ export class UserController {
   }
 
   @Get('getUser/:id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, ACGuard)
+  @UseRoles({
+    resource: 'user',
+    action: 'read',
+    possession: 'any',
+  })
   async getUser(@Param('id') id: string, @Res() response: Response) {
     return this.userService
       .getUserDetails(id)
@@ -99,6 +110,12 @@ export class UserController {
   }
 
   @Post('updatePassword')
+  @UseGuards(JwtAuthGuard, ACGuard)
+  @UseRoles({
+    resource: 'user',
+    action: 'update',
+    possession: 'own',
+  })
   async updatePassword(
     @Res() response: Response,
     @Body() updatePasswordDto: updatePasswordDto,
@@ -117,7 +134,12 @@ export class UserController {
   }
 
   @Post('sendRequest')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, ACGuard)
+  @UseRoles({
+    resource: 'request',
+    action: 'create',
+    possession: 'own',
+  })
   async addRequest(@Res() response: Response, @Body() userData: AddRequestDto) {
     return await this.userService
       .addRequest(userData)
@@ -131,7 +153,12 @@ export class UserController {
   }
 
   @Post('acceptRequest')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, ACGuard)
+  @UseRoles({
+    resource: 'request',
+    action: 'update',
+    possession: 'own',
+  })
   async acceptRequest(
     @Res() response: Response,
     @Body() userData: AcceptRequestDto,
@@ -148,7 +175,12 @@ export class UserController {
   }
 
   @Post('rejectRequest')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, ACGuard)
+  @UseRoles({
+    resource: 'request',
+    action: 'delete',
+    possession: 'own',
+  })
   async rejectRequest(
     @Res() response: Response,
     @Body() userData: RejectRequestDto,
@@ -165,6 +197,7 @@ export class UserController {
   }
 
   @Post('upload-profile')
+  @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file'))
   async uploadProfileImage(
     @UploadedFile() file: any,

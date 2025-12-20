@@ -58,7 +58,9 @@ export class UserService {
     const isValid = await bcrypt.compare(password, user.password);
     let token = '';
     if (isValid) {
-      token = await this.generateJwtToken(user.id, user.name, user.email);
+      token = await this.generateJwtToken(user.id, user.name, user.email, [
+        user.role,
+      ]);
     }
     const userDetails = {
       addedUsers: user.addedUsers,
@@ -70,6 +72,7 @@ export class UserService {
       profileUrl: user.profileUrl || '',
       requestPending: user.requestPending,
       requests: user.requests,
+      role: user.role,
       accessToken: token,
       isPasswordSet: user.password ? true : false,
     };
@@ -84,7 +87,9 @@ export class UserService {
       user = await this.userModel.create(userDetails);
     }
 
-    const token = await this.generateJwtToken(user.id, user.name, user.email);
+    const token = await this.generateJwtToken(user.id, user.name, user.email, [
+      user.role,
+    ]);
 
     const responseUser = {
       addedUsers: user.addedUsers,
@@ -96,6 +101,7 @@ export class UserService {
       profileUrl: user.profileUrl || '',
       requestPending: user.requestPending,
       requests: user.requests,
+      role: user.role,
       accessToken: token,
       isPasswordSet: user.password ? true : false,
     };
@@ -224,8 +230,9 @@ export class UserService {
     userId: string,
     userName: string,
     userEmail: string,
+    roles: string[],
   ): Promise<string> {
-    const payload = { userId, userName, userEmail };
+    const payload = { sub: userId, name: userName, email: userEmail, roles };
     return this.jwtService.sign(payload, {
       secret: process.env.JWT_SECRET,
       expiresIn: '5h',

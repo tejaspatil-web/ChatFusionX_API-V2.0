@@ -18,6 +18,9 @@ export class User {
   @Prop({ default: '' })
   profileUrl: string;
 
+  @Prop({ type: String, default: 'user' })
+  role: string;
+
   // Array of Group IDs where the user is an admin
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Group' }] })
   adminGroupIds: Types.ObjectId[];
