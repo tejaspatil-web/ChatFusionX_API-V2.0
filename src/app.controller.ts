@@ -5,7 +5,7 @@ import { Response } from 'express';
 export class AppController {
   constructor() {}
 
-  @Get('serverStatus')
+  @Get('health')
   async serverStatus(@Res() response: Response) {
     try {
       return response.status(HttpStatus.OK).send({ message: 'Server is awake and running' });

@@ -11,7 +11,7 @@ import { SaveMessageDto } from 'src/modules/group/dtos/group.dto';
 import { SavePrivateMessageDto } from 'src/modules/private-message/dtos/private-chat.dto';
 
 @WebSocketGateway({
-  namespace: 'getway',
+  namespace: 'ws',
   cors: {
     origin: ['http://localhost:4200','https://chatfusionx.vercel.app','https://chatfusionx.web.app'],
     methods: ['GET', 'POST'],
