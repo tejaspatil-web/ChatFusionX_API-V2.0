@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { VersioningType } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
-import dns from 'dns';
+import * as dns from 'dns';
 
 // Set DNS resolution order to prefer IPv4 addresses
 dns.setDefaultResultOrder("ipv4first");
