@@ -1,5 +1,4 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { GenerativeModel, GoogleGenerativeAI } from '@google/generative-ai';
 import { InjectModel } from '@nestjs/mongoose';
 import { ChatFusionXAI } from './chatfusionx-ai.schema';
 import { Model } from 'mongoose';
@@ -8,27 +7,11 @@ import { ChatState } from './dtos/chatfusionx-ai.dto';
 
 @Injectable()
 export class ChatFusionXAIService {
-  private readonly genAI: GoogleGenerativeAI;
-
   constructor(
     @InjectModel(ChatFusionXAI.name)
     private readonly chatFusionXAIModel: Model<ChatFusionXAI>,
     private readonly userContextService: UserContextService,
-  ) {
-    this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  }
-
-  private createModel(documentContext: string): GenerativeModel {
-    const userName = this.userContextService.getUserName() || 'User';
-    const systemInstruction = this.buildSystemInstruction(
-      userName,
-      documentContext,
-    );
-    return this.genAI.getGenerativeModel({
-      model: 'gemini-2.5-flash',
-      systemInstruction: systemInstruction,
-    });
-  }
+  ) {}
 
   private buildSystemInstruction(
     userName: string,
@@ -105,29 +88,63 @@ Rules:
 
       const history = allMessages
         .filter((m) => m.role !== 'system')
+        .slice(-5)
         .map((m) => ({
-          role: m.role as 'user' | 'model',
-          parts: m.parts,
+          role: m.role,
+          content: m.parts?.[0]?.text || '',
         }));
 
-      const model = this.createModel(documentContext?.[0] || '');
+      const userName = this.userContextService.getUserName() || 'User';
 
-      const chat = model.startChat({ history });
+      const systemInstruction = this.buildSystemInstruction(
+        userName,
+        documentContext?.[0] || '',
+      );
 
-      const result = await chat.sendMessage(prompt);
-      const response = await result.response.text();
+      const messagesPayload = [
+        {
+          role: 'system',
+          content: systemInstruction,
+        },
+        ...history.map((msg) => ({
+          role: msg.role === 'model' ? 'assistant' : 'user',
+          content: msg.content,
+        })),
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ];
+
+      const result = await fetch(
+        'https://openrouter.ai/api/v1/chat/completions',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'google/gemini-2.5-flash',
+            messages: messagesPayload,
+          }),
+        },
+      );
+
+      const data = await result.json();
+
+      const response = data.choices[0].message.content;
+
       await this.saveChatHistory(userId, response, prompt);
+
       return response;
-    } catch (error: any) {
+    } catch (error) {
+      console.error('========== OPENROUTER ERROR ==========');
+      console.error(error);
+      console.error('======================================');
+
       const response = `<b class="error">Failed to generate AI response</b>`;
-      console.error("========== GEMINI ERROR ==========");
-      console.error("Message:", error?.message);
-      console.error("Status:", error?.status);
-      console.error("Status Text:", error?.statusText);
-      console.error("Error Details:", error?.errorDetails);
-      console.error("Response:", error);
-      console.error("Stack:", error?.stack);
-      console.error("==================================");
+
       await this.saveChatHistory(userId, response, prompt);
       return response;
     }
