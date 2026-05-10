@@ -118,9 +118,16 @@ Rules:
       const response = await result.response.text();
       await this.saveChatHistory(userId, response, prompt);
       return response;
-    } catch (error) {
+    } catch (error: any) {
       const response = `<b class="error">Failed to generate AI response</b>`;
-      console.error('ChatFusionXAI Error:', error);
+      console.error("========== GEMINI ERROR ==========");
+      console.error("Message:", error?.message);
+      console.error("Status:", error?.status);
+      console.error("Status Text:", error?.statusText);
+      console.error("Error Details:", error?.errorDetails);
+      console.error("Response:", error);
+      console.error("Stack:", error?.stack);
+      console.error("==================================");
       await this.saveChatHistory(userId, response, prompt);
       return response;
     }
