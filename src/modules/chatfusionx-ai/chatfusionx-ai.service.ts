@@ -129,6 +129,7 @@ Rules:
           body: JSON.stringify({
             model: 'google/gemini-2.5-flash',
             messages: messagesPayload,
+            max_tokens: 1000,
           }),
         },
       );
