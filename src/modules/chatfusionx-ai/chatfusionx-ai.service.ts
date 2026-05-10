@@ -4,6 +4,7 @@ import { ChatFusionXAI } from './chatfusionx-ai.schema';
 import { Model } from 'mongoose';
 import { UserContextService } from 'src/common/user-context/user-context.service';
 import { ChatState } from './dtos/chatfusionx-ai.dto';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ChatFusionXAIService {
@@ -11,6 +12,7 @@ export class ChatFusionXAIService {
     @InjectModel(ChatFusionXAI.name)
     private readonly chatFusionXAIModel: Model<ChatFusionXAI>,
     private readonly userContextService: UserContextService,
+    private readonly configService: ConfigService,
   ) {}
 
   private buildSystemInstruction(
@@ -121,17 +123,28 @@ Rules:
         {
           method: 'POST',
           headers: {
-            Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+            Authorization: `Bearer ${this.configService.get<string>('OPENROUTER_API_KEY')}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            model: 'google/gemini-2.5-flash',
+            model: 'google/gemini-flash-1.5',
             messages: messagesPayload,
           }),
         },
       );
 
       const data = await result.json();
+
+      console.log(
+        'OPENROUTER RESPONSE:',
+        JSON.stringify(data, null, 2),
+      );
+
+      if (!data?.choices?.length) {
+        throw new Error(
+          data?.error?.message || 'No response returned from OpenRouter',
+        );
+      }
 
       const response = data.choices[0].message.content;
 
