@@ -13,7 +13,7 @@ import { SavePrivateMessageDto } from 'src/modules/private-message/dtos/private-
 @WebSocketGateway({
   namespace: 'ws',
   cors: {
-    origin: ['http://localhost:4200','https://chatfusionx.vercel.app','https://chatfusionx.web.app'],
+    origin: ['http://localhost:4200','https://chatfusionx.web.app'],
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type'],
     credentials: true,
